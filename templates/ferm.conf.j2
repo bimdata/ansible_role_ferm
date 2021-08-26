@@ -1,0 +1,49 @@
+{{ ansible_managed | comment }}
+
+{% if _ferm_vars | length > 0 %}
+# Define variables
+{% for vardef in _ferm_vars %}
+@def ${{ vardef.name }}=
+{%- if vardef.content is string %}{{ vardef.content  }}
+{%- else %}({% for value in vardef.content %}{{ value }}{%- if not loop.last %} {% endif %}{% endfor %}){% endif %};
+{% endfor %}
+
+{% endif %}
+
+{% if _ferm_hooks | length > 0 %}
+# Define hooks
+{% for varname in _ferm_hooks %}
+@hook {{ hostvars[inventory_hostname][varname] }};
+{% endfor %}
+
+{% endif %}
+
+# Functions definitions
+{% for funcdef in _ferm_functions %}
+# {{ funcdef.comment | default(omit) }}
+{{ funcdef.content }}
+{% endfor %}
+
+# Configure default policy
+domain ({{ ferm_default_domains }}){
+  table filter {
+    chain INPUT {
+{% for rule in ferm_default_inputs%}
+      {{ rule }}
+{% endfor %}
+    }
+    chain OUTPUT {
+{% for rule in ferm_default_outputs%}
+      {{ rule }}
+{% endfor %}
+    }
+    chain FORWARD {
+{% for rule in ferm_default_forwards%}
+      {{ rule }}
+{% endfor %}
+    }
+  }
+}
+
+# Include other rules in alphabetical order
+@include {{ ferm_rules_path }}/;

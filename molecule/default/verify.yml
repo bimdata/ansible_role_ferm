@@ -1,0 +1,12 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: "Check if ferm service is running"
+      service:
+        name: "{{ ferm_svc_name }}"
+        state: started
+        enabled: yes
+      register: svc_conf
+      check_mode: yes
+      failed_when: svc_conf is changed or svc_conf is failed

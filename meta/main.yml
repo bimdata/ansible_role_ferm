@@ -1,0 +1,24 @@
+---
+galaxy_info:
+  namespace: bimdata
+  role_name: ferm
+  author: Romain
+  description: This role installs and configures ferm.
+  company: BIMData.io
+  license: MIT
+  min_ansible_version: 2.9
+  platforms:
+    - name: Debian
+      versions:
+        - Stretch
+        - Buster
+        - Bullseye
+    - name: Ubuntu
+      versions:
+        - bionic
+        - focal
+  galaxy_tags:
+    - ferm
+    - iptables
+    - firewall
+dependencies: []

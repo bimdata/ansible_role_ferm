@@ -1,0 +1,46 @@
+---
+# Packages name
+ferm_pkg_name: ferm
+
+# Service name
+ferm_svc_name: ferm
+
+# Some paths
+ferm_main_conf_file: /etc/ferm/ferm.conf
+ferm_rules_path: /etc/ferm/ferm.d
+
+# Build the list of all variables containing ferm rules
+# these variables must be name: ferm_[...]_rules
+_ferm_rules: "{{ lookup('template', 'get_vars.j2', template_vars=dict(vartype='rule')) }}"
+_ferm_vars: "{{ lookup('template', 'get_vars.j2', template_vars=dict(vartype='var')) }}"
+_ferm_functions: "{{ lookup('template', 'get_vars.j2', template_vars=dict(vartype='function')) }}"
+_ferm_hooks: "{{ lookup('template', 'get_vars.j2', template_vars=dict(vartype='hook')) }}"
+
+# By default, this role delete all file in ferm_rules_path that are not list
+# in _ferm_all_rules
+ferm_delete_unknown_rulefiles: true
+
+# Defaults rules.
+# This is put in the main configuration file {{ ferm_main_conf_file }}
+# Other rules will be put in files in {{ ferm_rules_path }}
+ferm_input_policy: DROP
+ferm_output_policy: ACCEPT
+ferm_forward_policy: DROP
+
+ferm_default_domains: ['ip', 'ip6']
+
+ferm_default_table: filter
+
+ferm_default_inputs:
+  - "policy {{ ferm_input_policy }};"
+  - interface lo ACCEPT;
+  - "mod conntrack ctstate (RELATED ESTABLISHED) ACCEPT;"
+
+ferm_default_outputs:
+  - "policy {{ ferm_output_policy }};"
+  - outerface lo ACCEPT;
+  - "mod conntrack ctstate (RELATED ESTABLISHED) ACCEPT;"
+
+ferm_default_forwards:
+  - "policy {{ ferm_forward_policy }};"
+  - "mod conntrack ctstate (RELATED ESTABLISHED) ACCEPT;"

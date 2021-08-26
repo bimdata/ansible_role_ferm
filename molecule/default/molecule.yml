@@ -1,0 +1,73 @@
+---
+driver:
+  name: docker
+lint: |
+  set -e
+  yamllint .
+  ansible-lint --force-color
+platforms:
+  - name: stretch
+    image: debian:stretch
+    command: /sbin/init
+    privileged: true
+    groups:
+      - all
+  - name: buster
+    image: debian:buster
+    command: /sbin/init
+    privileged: true
+    groups:
+      - all
+  - name: bullseye
+    image: debian:bullseye
+    command: /sbin/init
+    privileged: true
+    groups:
+      - all
+  - name: bionic
+    image: ubuntu:bionic
+    command: /sbin/init
+    privileged: true
+    groups:
+      - all
+  - name: focal
+    image: ubuntu:focal
+    command: /sbin/init
+    privileged: true
+    groups:
+      - all
+provisioner:
+  name: ansible
+  playbook:
+    converge: converge.yml
+    verify: verify.yml
+  inventory:
+    group_vars:
+      all:
+        ferm_svc_name: ferm
+        ferm_main_conf_file: /etc/ferm/ferm.conf
+        ferm_rules_path: /etc/ferm/ferm.d
+        ferm_default_domains: ['ip']
+        ferm_test_var:
+          name: "testvar"
+          content: "TEST-VALUE"
+        ferm_tests_rules:
+          - name: test1
+            content:
+              - chains: ['INPUT']
+                rules:
+                  - proto tcp dport 80 mod comment comment "TEST-10" ACCEPT
+              - chains: ['OUTPUT']
+                rules:
+                  - proto tcp dport 80 mod comment comment "TEST-11" ACCEPT
+          - name: test2
+            content:
+              - chains: ['INPUT', 'OUTPUT']
+                rules:
+                  - proto tcp dport 81 mod comment comment "TEST-01" ACCEPT
+        ferm_raw_rule:
+          name: test-raw
+          raw_content: |
+            domain ip table filter {
+              chain OUTPUT proto tcp dport 82 mod comment comment "TEST-RAW" ACCEPT;
+            }

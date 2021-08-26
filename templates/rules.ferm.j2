@@ -1,0 +1,17 @@
+{{ ansible_managed | comment }}
+
+{% if item.raw_content is defined %}
+{{ item.raw_content }}
+{% else %}
+{% for content in item.content -%}
+{% if content.comment is defined %}# {{ content.comment }}{% endif %}
+domain ({% for domain in content.domains | default(ferm_default_domains) %}{{ domain }}{%- if not loop.last %} {% endif %}{% endfor %}) table {{ content.table | default(ferm_default_table) }} {
+  chain ({% for chain in content.chains %}{{ chain }}{%- if not loop.last %} {% endif %}{% endfor %}) {
+{% for rule in content.rules -%}
+{{ rule | indent( width=4, first=True) }}{% if not rule[-1] | regex_search("(;|})") %};{% endif %}
+
+{% endfor %}
+  }
+}
+{% endfor %}
+{% endif %}
