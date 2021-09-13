@@ -1,7 +1,7 @@
 {{ ansible_managed | comment }}
 
 {% if _ferm_vars | length > 0 %}
-# Define variables
+# Variable definitions
 {% for vardef in _ferm_vars %}
 @def ${{ vardef.name }}=
 {%- if vardef.content is string %}{{ vardef.content  }}
@@ -9,23 +9,25 @@
 {% endfor %}
 
 {% endif %}
-
 {% if _ferm_hooks | length > 0 %}
-# Define hooks
-{% for varname in _ferm_hooks %}
-@hook {{ hostvars[inventory_hostname][varname] }};
+# Hook definitions
+{% for hookdef in _ferm_hooks %}
+# {{ hookdef.comment | default(omit) }}
+@hook {{ hookdef.content }}{% if not hookdef.content[-1] | regex_search("(;|})") %};{% endif %}
 {% endfor %}
 
 {% endif %}
-
-# Functions definitions
+{% if _ferm_functions | length > 0 %}
+# Function definitions
 {% for funcdef in _ferm_functions %}
 # {{ funcdef.comment | default(omit) }}
 {{ funcdef.content }}
 {% endfor %}
 
+{% endif %}
+
 # Configure default policy
-domain ({{ ferm_default_domains }}){
+domain (ip ip6){
   table filter {
     chain INPUT {
 {% for rule in ferm_default_inputs%}
