@@ -4,7 +4,7 @@
 # Variable definitions
 {% for vardef in _ferm_vars %}
 @def ${{ vardef.name }}=
-{%- if vardef.content is string %}{{ vardef.content  }}
+{%- if vardef.content is string %}{{ vardef.content }}
 {%- else %}({% for value in vardef.content %}{{ value }}{%- if not loop.last %} {% endif %}{% endfor %}){% endif %};
 {% endfor %}
 
@@ -12,18 +12,22 @@
 {% if _ferm_hooks | length > 0 %}
 # Hook definitions
 {% for hookdef in _ferm_hooks %}
-# {{ hookdef.comment | default(omit) }}
+{% if hookdef.comment is defined %}
+## {{ hookdef.comment }}
+{% endif %}
 @hook {{ hookdef.content }}{% if not hookdef.content[-1] | regex_search("(;|})") %};{% endif %}
+
 {% endfor %}
 
 {% endif %}
 {% if _ferm_functions | length > 0 %}
 # Function definitions
 {% for funcdef in _ferm_functions %}
-# {{ funcdef.comment | default(omit) }}
+{% if funcdef.comment is defined %}
+## {{ funcdef.comment }}
+{% endif %}
 {{ funcdef.content }}
 {% endfor %}
-
 {% endif %}
 
 # Configure default policy
