@@ -1,0 +1,55 @@
+{{ ansible_managed | comment }}
+
+{% if _ferm_vars | length > 0 %}
+# Variable definitions
+{% for vardef in _ferm_vars %}
+@def ${{ vardef.name }}=
+{%- if vardef.content is string %}{{ vardef.content }}
+{%- else %}({% for value in vardef.content %}{{ value }}{%- if not loop.last %} {% endif %}{% endfor %}){% endif %};
+{% endfor %}
+
+{% endif %}
+{% if _ferm_hooks | length > 0 %}
+# Hook definitions
+{% for hookdef in _ferm_hooks %}
+{% if hookdef.comment is defined %}
+## {{ hookdef.comment }}
+{% endif %}
+@hook {{ hookdef.content }}{% if not hookdef.content[-1] | regex_search("(;|})") %};{% endif %}
+
+{% endfor %}
+
+{% endif %}
+{% if _ferm_functions | length > 0 %}
+# Function definitions
+{% for funcdef in _ferm_functions %}
+{% if funcdef.comment is defined %}
+## {{ funcdef.comment }}
+{% endif %}
+{{ funcdef.content }}
+{% endfor %}
+{% endif %}
+
+# Configure default policy
+domain (ip ip6){
+  table filter {
+    chain INPUT {
+{% for rule in ferm_default_inputs%}
+      {{ rule }}
+{% endfor %}
+    }
+    chain OUTPUT {
+{% for rule in ferm_default_outputs%}
+      {{ rule }}
+{% endfor %}
+    }
+    chain FORWARD {
+{% for rule in ferm_default_forwards%}
+      {{ rule }}
+{% endfor %}
+    }
+  }
+}
+
+# Include other rules in alphabetical order
+@include {{ ferm_rules_path }}/;

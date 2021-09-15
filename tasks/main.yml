@@ -1,0 +1,70 @@
+---
+- name: "Ensure ferm in installed."
+  apt:
+    name: "{{ ferm_pkg_name }}"
+    state: present
+    cache_valid_time: 3600
+
+- name: "Enable ferm service."
+  service:
+    name: "{{ ferm_svc_name }}"
+    enabled: True
+
+- name: "Ensure the needed directories exist."
+  file:
+    path: "{{ ferm_rules_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: "Generate default configuration with basic rules."
+  template:
+    src: ferm.conf.j2
+    dest: "{{ ferm_main_conf_file }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart ferm
+
+- name: "Generate generic rules."
+  template:
+    src: rules.ferm.j2
+    dest: "{{ ferm_rules_path }}/{{ item.name }}"
+    owner: root
+    group: root
+    mode: 0644
+  loop: "{{ _ferm_rules }}"
+  notify: Restart ferm
+
+- name: "Get and remove unknown rules."
+  block:
+    - name: "Get all needed file names."
+      set_fact:
+        _needed_files: "{{
+          (_needed_files | default([]))
+          + [ferm_rules_path + '/' + item.name]
+        }}"
+      loop: "{{ _ferm_rules }}"
+
+    - name: "Get current files."
+      find:
+        paths: "{{ ferm_rules_path }}"
+      register: _current_files
+
+    - name: "Get unknown files."
+      set_fact:
+        _files_to_delete: "{{ _files_to_delete | default([]) + [ item ] }}"
+      loop: "{{ _current_files.files }}"
+      when:
+        - _needed_files is not defined or
+          item.path not in _needed_files
+
+    - name: "Remove unknown files."
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ _files_to_delete }}"
+      when: _files_to_delete is defined
+      notify: Restart ferm
+  when: ferm_delete_unknown_rulefiles
