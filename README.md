@@ -171,6 +171,50 @@ ferm_dnat_rules:
       &EASY_DNAT($main_public_ip, tcp, (80 443), $web_front_addr);
 ```
 
+### Docker example
+Docker and other software may want to manage their own iptables rules. This is a
+possible, with some limitations. Here an example for Docker:
+
+```
+# No rule can't be defined in FORWARD before the rule use to preserve all
+# rules configured by docker
+ferm_default_forwards: []
+
+# Preserve docker rules
+ferm_docker_preserve_rules:
+  - name: 99-docker-users.ferm
+    content:
+      - domains: ['ip']
+        chains: ['DOCKER-USER']
+        rules:
+          - "RETURN;"
+  - name: 00-docker-preserve.ferm
+    content:
+      - domains: ['ip']
+        chains:
+          - DOCKER
+          - DOCKER-INGRESS
+          - DOCKER-ISOLATION-STAGE-1
+          - DOCKER-ISOLATION-STAGE-2
+          - FORWARD
+        rules:
+          - "@preserve;"
+      - domains: ['ip']
+        table: nat
+        chains:
+          - DOCKER
+          - DOCKER-INGRESS
+          - PREROUTING
+          - OUTPUT
+          - POSTROUTING
+        rules:
+          - "@preserve;"
+```
+
+[@preserve](http://ferm.foo-projects.org/download/2.5/ferm.html#BASIC-KEYWORDS)
+is a special word use by `ferm`. It will save the previous rules with `iptables-save`
+and then extracts all rules for the preserved chains ans insert them into the new rules.
+
 Dependencies
 ------------
 
