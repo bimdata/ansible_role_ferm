@@ -5,6 +5,10 @@ ferm_pkg_name: ferm
 # Service name
 ferm_svc_name: ferm
 
+# Since Debian 11, ferm ignore alternative setting and force the use of
+# iptables-legacy (https://github.com/MaxKellermann/ferm/issues/47)
+ferm_iptables_path: /usr/sbin/iptables-legacy
+
 # Some paths
 ferm_main_conf_file: /etc/ferm/ferm.conf
 ferm_rules_path: /etc/ferm/ferm.d

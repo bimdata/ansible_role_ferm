@@ -1,9 +1,18 @@
 ---
+- name: "Configure iptables alternatives."
+  alternatives:
+    name: 'iptables'
+    path: "{{ ferm_iptables_path }}"
+  when:
+    - ansible_distribution == 'Debian'
+    - ansible_distribution_major_version is version('10', '>')
+
 - name: "Ensure ferm in installed."
   apt:
     name: "{{ ferm_pkg_name }}"
     state: present
     cache_valid_time: 3600
+    update_cache: true
 
 - name: "Enable ferm service."
   service:

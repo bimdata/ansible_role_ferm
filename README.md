@@ -67,6 +67,18 @@ Each variables matching these regexes must be:
 It allows you to define variables in multiple group_vars and cumulate them for
 hosts in multiples groups without the need to rewrite the complete list.
 
+**Debian 11 use `iptables-nft` by default and it's not supported by ferm.**
+Since Debian 11, ferm ignore alternative setting and force the use of
+iptables-legacy (https://github.com/MaxKellermann/ferm/issues/47)
+
+| Variables                 | Default value                                                                     | Description                                       |
+|---------------------------|-----------------------------------------------------------------------------------|---------------------------------------------------|
+| ferm_iptables_path        | /usr/sbin/iptables-legacy                                                         | Ferm default input policy.                        |
+
+**This variable is only used on Debian host with version > 10.**
+It will configure the OS with the `alternative` system to set the value of `ferm_iptables_path`
+as the default iptables command.
+
 ### Variable definitions
 A ferm variable can be define like this:
 ```
@@ -177,7 +189,7 @@ ferm_interface_vars:
     content:
       - eth2
       - eth3
-      
+
 ferm_ips_vars:
   - name: main_public_ip
     content: ['1.2.3.4']
