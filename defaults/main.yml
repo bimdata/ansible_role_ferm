@@ -45,6 +45,4 @@ ferm_default_outputs:
   - outerface lo ACCEPT;
   - "mod conntrack ctstate (RELATED ESTABLISHED) ACCEPT;"
 
-ferm_default_forwards:
-  - "policy {{ ferm_forward_policy }};"
-  - "mod conntrack ctstate (RELATED ESTABLISHED) ACCEPT;"
+ferm_default_forwards: []

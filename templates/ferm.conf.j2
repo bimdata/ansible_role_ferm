@@ -33,21 +33,27 @@
 # Configure default policy
 domain (ip ip6){
   table filter {
+{% if ferm_default_inputs | length %}
     chain INPUT {
 {% for rule in ferm_default_inputs%}
       {{ rule }}
 {% endfor %}
     }
+{% endif %}
+{% if ferm_default_outputs | length %}
     chain OUTPUT {
 {% for rule in ferm_default_outputs%}
       {{ rule }}
 {% endfor %}
     }
+{% endif %}
+{% if ferm_default_forwards | length %}
     chain FORWARD {
 {% for rule in ferm_default_forwards%}
       {{ rule }}
 {% endfor %}
     }
+{% endif %}
   }
 }
 

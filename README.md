@@ -67,6 +67,26 @@ Each variables matching these regexes must be:
 It allows you to define variables in multiple group_vars and cumulate them for
 hosts in multiples groups without the need to rewrite the complete list.
 
+Variables used to define the default ruleset:
+- this one configure the default ruleset for the INPUT table:
+  ```
+  ferm_default_inputs:
+    - "policy {{ ferm_input_policy }};"
+    - interface lo ACCEPT;
+    - "mod conntrack ctstate (RELATED ESTABLISHED) ACCEPT;"
+  ```
+- this one configure the default ruleset for the OUPUT table:
+  ```
+  ferm_default_outputs:
+    - "policy {{ ferm_output_policy }};"
+    - outerface lo ACCEPT;
+    - "mod conntrack ctstate (RELATED ESTABLISHED) ACCEPT;"
+  ```
+- this one configure the default ruleset for the FORWARD table:
+  ```
+  ferm_default_forwards: []
+  ```
+
 **Debian 11 use `iptables-nft` by default and it's not supported by ferm.**
 Since Debian 11, ferm ignore alternative setting and force the use of
 iptables-legacy (https://github.com/MaxKellermann/ferm/issues/47)
