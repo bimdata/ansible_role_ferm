@@ -67,6 +67,38 @@ Each variables matching these regexes must be:
 It allows you to define variables in multiple group_vars and cumulate them for
 hosts in multiples groups without the need to rewrite the complete list.
 
+Variables used to define the default ruleset:
+- this one configure the default ruleset for the INPUT table:
+  ```
+  ferm_default_inputs:
+    - "policy {{ ferm_input_policy }};"
+    - interface lo ACCEPT;
+    - "mod conntrack ctstate (RELATED ESTABLISHED) ACCEPT;"
+  ```
+- this one configure the default ruleset for the OUPUT table:
+  ```
+  ferm_default_outputs:
+    - "policy {{ ferm_output_policy }};"
+    - outerface lo ACCEPT;
+    - "mod conntrack ctstate (RELATED ESTABLISHED) ACCEPT;"
+  ```
+- this one configure the default ruleset for the FORWARD table:
+  ```
+  ferm_default_forwards: []
+  ```
+
+**Debian 11 use `iptables-nft` by default and it's not supported by ferm.**
+Since Debian 11, ferm ignore alternative setting and force the use of
+iptables-legacy (https://github.com/MaxKellermann/ferm/issues/47)
+
+| Variables                 | Default value                                                                     | Description                                       |
+|---------------------------|-----------------------------------------------------------------------------------|---------------------------------------------------|
+| ferm_iptables_path        | /usr/sbin/iptables-legacy                                                         | Ferm default input policy.                        |
+
+**This variable is only used on Debian host with version > 10.**
+It will configure the OS with the `alternative` system to set the value of `ferm_iptables_path`
+as the default iptables command.
+
 ### Variable definitions
 A ferm variable can be define like this:
 ```
@@ -139,6 +171,50 @@ ferm_dnat_rules:
       &EASY_DNAT($main_public_ip, tcp, (80 443), $web_front_addr);
 ```
 
+### Docker example
+Docker and other software may want to manage their own iptables rules. This is a
+possible, with some limitations. Here an example for Docker:
+
+```
+# No rule can't be defined in FORWARD before the rule use to preserve all
+# rules configured by docker
+ferm_default_forwards: []
+
+# Preserve docker rules
+ferm_docker_preserve_rules:
+  - name: 99-docker-users.ferm
+    content:
+      - domains: ['ip']
+        chains: ['DOCKER-USER']
+        rules:
+          - "RETURN;"
+  - name: 00-docker-preserve.ferm
+    content:
+      - domains: ['ip']
+        chains:
+          - DOCKER
+          - DOCKER-INGRESS
+          - DOCKER-ISOLATION-STAGE-1
+          - DOCKER-ISOLATION-STAGE-2
+          - FORWARD
+        rules:
+          - "@preserve;"
+      - domains: ['ip']
+        table: nat
+        chains:
+          - DOCKER
+          - DOCKER-INGRESS
+          - PREROUTING
+          - OUTPUT
+          - POSTROUTING
+        rules:
+          - "@preserve;"
+```
+
+[@preserve](http://ferm.foo-projects.org/download/2.5/ferm.html#BASIC-KEYWORDS)
+is a special word use by `ferm`. It will save the previous rules with `iptables-save`
+and then extracts all rules for the preserved chains ans insert them into the new rules.
+
 Dependencies
 ------------
 
@@ -177,7 +253,7 @@ ferm_interface_vars:
     content:
       - eth2
       - eth3
-      
+
 ferm_ips_vars:
   - name: main_public_ip
     content: ['1.2.3.4']
