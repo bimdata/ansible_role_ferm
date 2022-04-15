@@ -91,13 +91,16 @@ Variables used to define the default ruleset:
 Since Debian 11, ferm ignore alternative setting and force the use of
 iptables-legacy (https://github.com/MaxKellermann/ferm/issues/47)
 
-| Variables                 | Default value                                                                     | Description                                       |
-|---------------------------|-----------------------------------------------------------------------------------|---------------------------------------------------|
-| ferm_iptables_path        | /usr/sbin/iptables-legacy                                                         | Ferm default input policy.                        |
+| Variables           | Default value              | Description                                       |
+|---------------------|----------------------------|---------------------------------------------------|
+| ferm_iptables_path  | /usr/sbin/iptables-legacy  | Path of iptables-legacy.                          |
+| ferm_ip6tables_path | /usr/sbin/ip6tables-legacy | Path of ip6tables-legacy.                         |
+| ferm_arptables_path | /usr/sbin/arptables-legacy | Path of arptables-legacy.                         |
+| ferm_ebtables_path  | /usr/sbin/ebtables-legacy  | Path of ebtables-legacy.                          |
 
-**This variable is only used on Debian host with version > 10.**
-It will configure the OS with the `alternative` system to set the value of `ferm_iptables_path`
-as the default iptables command.
+**These variables are only used on Debian host with version > 10.**
+It will configure the OS with the `alternative` system to set the value of `ferm_iptables_path`,
+`ferm_ip6tables_path`, `ferm_arptables_path` and `ferm_ebtables_path` as the default iptables command.
 
 ### Variable definitions
 A ferm variable can be define like this:
@@ -157,8 +160,8 @@ ferm_dnat_function:
   comment: "Easy DNAT (DNAT+filter rules)"
   content: |
     @def &EASY_DNAT($wan_ip, $proto, $port, $dest) = {
-      domain ip table nat chain PREROUTING interface $wan_iface daddr $wan_ip proto $proto dport $port DNAT to @ipfilter($dest);
-      domain (ip ip6) table filter chain FORWARD interface $wan_iface outerface $dmz_iface daddr $dest proto $proto dport $port ACCEPT;
+      domain ip table nat chain PREROUTING daddr $wan_ip proto $proto dport $port DNAT to @ipfilter($dest);
+      domain (ip ip6) table filter chain FORWARD outerface $dmz_iface daddr $dest proto $proto dport $port ACCEPT;
     }
 ```
 
@@ -266,8 +269,8 @@ ferm_dnat_function:
   comment: "Easy DNAT (DNAT+filter rules)"
   content: |
     @def &EASY_DNAT($wan_ip, $proto, $port, $dest) = {
-      domain ip table nat chain PREROUTING interface $wan_iface daddr $wan_ip proto $proto dport $port DNAT to @ipfilter($dest);
-      domain (ip ip6) table filter chain FORWARD interface $wan_iface outerface $dmz_iface daddr $dest proto $proto dport $port ACCEPT;
+      domain ip table nat chain PREROUTING daddr $wan_ip proto $proto dport $port DNAT to @ipfilter($dest);
+      domain (ip ip6) table filter chain FORWARD outerface $dmz_iface daddr $dest proto $proto dport $port ACCEPT;
     }
 
 ferm_dnat_rules:

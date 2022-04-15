@@ -1,0 +1,44 @@
+---
+- name: "Configure iptables alternatives."
+  alternatives:
+    name: 'iptables'
+    path: "{{ ferm_iptables_path }}"
+
+- name: "Configure ip6tables alternatives."
+  alternatives:
+    name: 'ip6tables'
+    path: "{{ ferm_ip6tables_path }}"
+
+- name: "Check if ebtables legacy exists"
+  stat:
+    path: "{{ ferm_ebtables_path }}"
+    get_attributes: false
+    get_checksum: false
+    get_mime: false
+  register: _ebtables
+  when: ferm_ebtables_path | length > 0
+
+- name: "Configure ebtables alternatives."
+  alternatives:
+    name: 'ebtables'
+    path: "{{ ferm_ebtables_path }}"
+  when: 
+    - ferm_ebtables_path | length > 0
+    - _ebtables.stat.exists | bool
+
+- name: "Check if arptables legacy exists"
+  stat:
+    path: "{{ ferm_arptables_path }}"
+    get_attributes: false
+    get_checksum: false
+    get_mime: false
+  register: _arptables
+  when: ferm_arptables_path | length > 0
+
+- name: "Configure arptables alternatives."
+  alternatives:
+    name: 'arptables'
+    path: "{{ ferm_arptables_path }}"
+  when: 
+    - ferm_arptables_path | length > 0
+    - _arptables.stat.exists | bool

@@ -1,18 +1,16 @@
 ---
-- name: "Configure iptables alternatives."
-  alternatives:
-    name: 'iptables'
-    path: "{{ ferm_iptables_path }}"
-  when:
-    - ansible_distribution == 'Debian'
-    - ansible_distribution_major_version is version('10', '>')
-
 - name: "Ensure ferm in installed."
   apt:
     name: "{{ ferm_pkg_name }}"
     state: present
     cache_valid_time: 3600
     update_cache: true
+
+- name: "Include tasks to force use of iptables-legacy when needed."
+  include_tasks: force-legacy.yml
+  when:
+    - ansible_distribution == 'Debian'
+    - ansible_distribution_major_version is version('10', '>')
 
 - name: "Enable ferm service."
   service:
@@ -52,8 +50,7 @@
       set_fact:
         _needed_files: "{{
           (_needed_files | default([]))
-          + [ferm_rules_path + '/' + item.name]
-        }}"
+          + [ferm_rules_path + '/' + item.name] }}"
       loop: "{{ _ferm_rules }}"
 
     - name: "Get current files."

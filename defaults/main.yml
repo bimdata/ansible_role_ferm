@@ -7,7 +7,10 @@ ferm_svc_name: ferm
 
 # Since Debian 11, ferm ignore alternative setting and force the use of
 # iptables-legacy (https://github.com/MaxKellermann/ferm/issues/47)
+ferm_arptables_path: /usr/sbin/arptables-legacy
+ferm_ebtables_path: /usr/sbin/ebtables-legacy
 ferm_iptables_path: /usr/sbin/iptables-legacy
+ferm_ip6tables_path: /usr/sbin/ip6tables-legacy
 
 # Some paths
 ferm_main_conf_file: /etc/ferm/ferm.conf
