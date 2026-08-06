@@ -43,15 +43,16 @@ Variable used for rules configuration:
 
 Variable used for rules definition:
 
-| Variables                 | Default value                                                                     | Description                                       |
-|---------------------------|-----------------------------------------------------------------------------------|---------------------------------------------------|
-| ferm_input_policy         | DROP                                                                              | Ferm default input policy.                        |
-| ferm_output_policy        | ACCEPT                                                                            | Ferm default output policy.                       |
-| ferm_forward_policy       | DROP                                                                              | Ferm default forward policy.                      |
-| _ferm_rules               | "{{ lookup('template', 'get_vars.j2', template_vars=dict(vartype='rule')) }}"     | List of dictionaries defining all ferm rules.     |
-| _ferm_vars                | "{{ lookup('template', 'get_vars.j2', template_vars=dict(vartype='var')) }}"      | List of dictionaries defining all ferm variables. |
-| _ferm_functions           | "{{ lookup('template', 'get_vars.j2', template_vars=dict(vartype='function')) }}" | List of dictionaries defining all ferm functions. |
-| _ferm_hooks               | "{{ lookup('template', 'get_vars.j2', template_vars=dict(vartype='hook')) }}"     | List of dictionaries defining all ferm hooks.     |
+| Variables                 | Default value                                                                                                   | Description                                       |
+|---------------------------|-----------------------------------------------------------------------------------------------------------------|---------------------------------------------------|
+| ferm_input_policy         | DROP                                                                                                            | Ferm default input policy.                        |
+| ferm_output_policy        | ACCEPT                                                                                                          | Ferm default output policy.                       |
+| ferm_forward_policy       | DROP                                                                                                            | Ferm default forward policy.                      |
+| _ferm_rules               | "{{ lookup('template', 'get_vars.j2', template_vars=dict(app_name='ferm', var_type='rule')) | from_json }}"     | List of dictionaries defining all ferm rules.     |
+| _ferm_vars                | "{{ lookup('template', 'get_vars.j2', template_vars=dict(app_name='ferm', var_type='var')) | from_json }}"      | List of dictionaries defining all ferm variables. |
+| _ferm_functions           | "{{ lookup('template', 'get_vars.j2', template_vars=dict(app_name='ferm', var_type='function')) | from_json }}" | List of dictionaries defining all ferm functions. |
+| _ferm_hooks               | "{{ lookup('template', 'get_vars.j2', template_vars=dict(app_name='ferm', var_type='hook')) | from_json }}"     | List of dictionaries defining all ferm hooks.     |
+
 
 **In most cases, you should not modify the variables that start with an '_'.**
 Templating is used to build these lists with other variables.

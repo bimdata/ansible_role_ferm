@@ -18,10 +18,10 @@ ferm_rules_path: /etc/ferm/ferm.d
 
 # Build the list of all variables containing ferm rules
 # these variables must be name: ferm_[...]_rules
-_ferm_rules: "{{ lookup('template', 'get_vars.j2', template_vars=dict(vartype='rule')) }}"
-_ferm_vars: "{{ lookup('template', 'get_vars.j2', template_vars=dict(vartype='var')) }}"
-_ferm_functions: "{{ lookup('template', 'get_vars.j2', template_vars=dict(vartype='function')) }}"
-_ferm_hooks: "{{ lookup('template', 'get_vars.j2', template_vars=dict(vartype='hook')) }}"
+_ferm_rules: "{{ lookup('template', 'get_vars.j2', template_vars=dict(app_name='ferm', var_type='rule')) | from_json }}"
+_ferm_vars: "{{ lookup('template', 'get_vars.j2', template_vars=dict(app_name='ferm', var_type='var')) | from_json }}"
+_ferm_functions: "{{ lookup('template', 'get_vars.j2', template_vars=dict(app_name='ferm', var_type='function')) | from_json }}"
+_ferm_hooks: "{{ lookup('template', 'get_vars.j2', template_vars=dict(app_name='ferm', var_type='hook')) | from_json }}"
 
 # By default, this role delete all file in ferm_rules_path that are not list
 # in _ferm_all_rules
