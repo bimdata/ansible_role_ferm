@@ -32,7 +32,7 @@
     owner: root
     group: root
     mode: 0644
-  notify: Restart ferm
+  notify: "Reload ferm"
 
 - name: "Generate generic rules."
   template:
@@ -42,7 +42,7 @@
     group: root
     mode: 0644
   loop: "{{ _ferm_rules }}"
-  notify: Restart ferm
+  notify: "Reload ferm"
 
 - name: "Get and remove unknown rules."
   block:
@@ -72,5 +72,5 @@
         state: absent
       loop: "{{ _files_to_delete }}"
       when: _files_to_delete is defined
-      notify: Restart ferm
+      notify: "Reload ferm"
   when: ferm_delete_unknown_rulefiles

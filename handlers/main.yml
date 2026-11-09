@@ -1,5 +1,5 @@
 ---
-- name: "Restart ferm"
+- name: "Reload ferm"
   service:
     name: "{{ ferm_svc_name }}"
-    state: "restarted"
+    state: "reloaded"
